@@ -2,7 +2,6 @@ version: "3.8"
 
 services:
   nextcloud-aio-apache:
-    container_name: nextcloud-aio-apache
     depends_on:
       - nextcloud-aio-onlyoffice
       - nextcloud-aio-collabora
@@ -30,7 +29,6 @@ services:
       - nextcloud-aio
  
   nextcloud-aio-database:
-    container_name: nextcloud-aio-database
     image: nextcloud/aio-postgresql:latest-arm64
     volumes:
       - nextcloud_aio_database:/var/lib/postgresql/data:rw
@@ -47,7 +45,6 @@ services:
       - nextcloud-aio
  
   nextcloud-aio-nextcloud:
-    container_name: nextcloud-aio-nextcloud
     depends_on:
       - nextcloud-aio-database
       - nextcloud-aio-redis
@@ -103,31 +100,32 @@ services:
       - nextcloud-aio
  
   nextcloud-aio-redis:
-    container_name: nextcloud-aio-redis
     image: nextcloud/aio-redis:latest-arm64
     environment:
       - REDIS_HOST_PASSWORD=${REDIS_PASSWORD}
       - TZ=${TIMEZONE}
+    volumes:
+      - nextcloud_aio_redis:/data:rw
     stop_grace_period: 10s
     restart: unless-stopped
     networks:
       - nextcloud-aio
  
   nextcloud-aio-collabora:
-    container_name: nextcloud-aio-collabora
     image: nextcloud/aio-collabora:latest-arm64
     environment:
       - aliasgroup1=https://${NC_DOMAIN}:443
       - extra_params=--o:ssl.enable=false --o:ssl.termination=true --o:logging.level=warning --o:home_mode.enable=true ${COLLABORA_SECCOMP_POLICY}
       - dictionaries=${COLLABORA_DICTIONARIES}
       - TZ=${TIMEZONE}
+    volumes:
+      - nextcloud_aio_collabora_fonts:/opt/cool/systemplate/tmpfonts:rw
     stop_grace_period: 10s
     restart: unless-stopped
     networks:
       - nextcloud-aio
  
   nextcloud-aio-talk:
-    container_name: nextcloud-aio-talk
     image: nextcloud/aio-talk:latest-arm64
     ports:
       - ${TALK_PORT}:${TALK_PORT}/tcp
@@ -145,7 +143,6 @@ services:
       - nextcloud-aio
  
   nextcloud-aio-onlyoffice:
-    container_name: nextcloud-aio-onlyoffice
     image: nextcloud/aio-onlyoffice:latest-arm64
     environment:
       - TZ=${TIMEZONE}
@@ -160,7 +157,6 @@ services:
       - nextcloud-aio
  
   nextcloud-aio-imaginary:
-    container_name: nextcloud-aio-imaginary
     image: nextcloud/aio-imaginary:latest-arm64
     environment:
       - TZ=${TIMEZONE}
@@ -170,7 +166,6 @@ services:
       - nextcloud-aio
  
   nextcloud-aio-fulltextsearch:
-    container_name: nextcloud-aio-fulltextsearch
     image: nextcloud/aio-fulltextsearch:latest-arm64
     environment:
       - TZ=${TIMEZONE}
@@ -186,6 +181,8 @@ services:
 volumes:
   nextcloud_aio_apache:
     name: nextcloud_aio_apache
+  nextcloud_aio_collabora_fonts:
+    name: nextcloud_aio_collabora_fonts
   nextcloud_aio_database:
     name: nextcloud_aio_database
   nextcloud_aio_database_dump:
@@ -196,6 +193,8 @@ volumes:
     name: nextcloud_aio_nextcloud
   nextcloud_aio_onlyoffice:
     name: nextcloud_aio_onlyoffice
+  nextcloud_aio_redis:
+    name: nextcloud_aio_redis
   nextcloud_aio_nextcloud_data:
     name: nextcloud_aio_nextcloud_data
 
